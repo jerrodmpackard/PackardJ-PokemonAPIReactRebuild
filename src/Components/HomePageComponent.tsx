@@ -21,6 +21,7 @@ const HomePageComponent = () => {
     const [pokemonAbilities, setPokemonAbilities] = useState<string>('');
     const [pokemonLocation, setPokemonLocation] = useState<string>('');
     const [pokemonDescription, setPokemonDescription] = useState<string>('');
+    const [pokemonEvolution, setPokemonEvolution] = useState<string>('');
 
     const handleSearch = () => {
         if(pokemonInput){
@@ -64,6 +65,7 @@ const HomePageComponent = () => {
             const evol = description.evolution_chain.url;
             const evolve = await fetch(evol);
             const evolution = await evolve.json();
+            // setPokemonEvolution(evolution.chain.species.name + " > " + evolution.chain.evolves_to[0].species.name + " > " + evolution.chain.evolves_to[0].evolves_to[0].species.name);
 
         }
         getData();
@@ -158,7 +160,7 @@ const HomePageComponent = () => {
 
                         <div className="bg-zinc-300/75 rounded-lg mt-5 mb-10 p-5">
                             <p className="text-white text-2xl lg:text-3xl">Evolutions:</p>
-                            <p id="pokemonEvolutions" className="text-white text-2xl lg:text-3xl text-center">Evolutions</p>
+                            <p className="text-white text-2xl lg:text-3xl text-center">{pokemonEvolution}</p>
                         </div>
                     </div>
                 </div>
