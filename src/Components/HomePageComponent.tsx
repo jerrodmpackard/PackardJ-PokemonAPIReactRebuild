@@ -8,24 +8,36 @@ import { Button, Modal } from 'flowbite-react'
 
 const HomePageComponent = () => {
 
-    let pokeName: string = '';
     let defaultImg;
     let shinyImg;
 
-    const [pokemon, setPokemon] = useState<IPokemon>();
-    const [pokemonName, setPokemonName] = useState<string>();
-    const [pokemonID, setPokemonID] = useState<number>();
-    const [pokemonImage, setPokemonImage] = useState<string>();
-    const [pokemonMoves, setPokemonMoves] = useState<string>();
-    const [type, setType] = useState<string>();
-    const [pokemonAbilities, setPokemonAbilities] = useState<string>();
-    const [pokemonLocation, setPokemonLocation] = useState<string>();
-    const [pokemonDescription, setPokemonDescription] = useState<string>();
+    const [pokemonInput, setPokemonInput] = useState<string | number>('');
+    const [searchPokemon, setSearchPokemon] = useState<string | number>('pikachu');
+    const [pokemonName, setPokemonName] = useState<string>('');
+    const [pokemonID, setPokemonID] = useState<number>(1);
+    const [pokemonImage, setPokemonImage] = useState<string>('');
+    const [pokemonMoves, setPokemonMoves] = useState<string>('');
+    const [type, setType] = useState<string>('');
+    const [pokemonAbilities, setPokemonAbilities] = useState<string>('');
+    const [pokemonLocation, setPokemonLocation] = useState<string>('');
+    const [pokemonDescription, setPokemonDescription] = useState<string>('');
+
+    const handleSearch = () => {
+        if(pokemonInput){
+            setSearchPokemon(pokemonInput);
+        }
+    }
+
+    const handleRandom = () => {
+        const randomNum = Math.floor(Math.random() * 649);
+        if(randomNum){
+            setSearchPokemon(randomNum);
+        }
+    };
 
     useEffect(() => {
         const getData = async () => {
-            const pokemon = await PokemonAPI('pikachu');
-            setPokemon(pokemon);
+            const pokemon = await PokemonAPI(searchPokemon);
             let name = pokemon.name[0].toUpperCase() + pokemon.name.substring(1);
             setPokemonName(name.split('-').join(' '));
             setPokemonID(pokemon.id);
@@ -38,7 +50,7 @@ const HomePageComponent = () => {
 
             const loc = await fetch(pokemon.location_area_encounters);
             const location = await loc.json();
-            if (location.length == 0) {
+            if (location.length === 0) {
                 setPokemonLocation("N/A");
             } else {
                 setPokemonLocation(location[0].location_area.name.split("-").join(" "));
@@ -46,17 +58,16 @@ const HomePageComponent = () => {
 
             const desc = await fetch(pokemon.species.url);
             const description = await desc.json();
-            const english = description.flavor_text_entries.findIndex((name: FlavorTextEntry) => name.language.name == "en");
+            const english = description.flavor_text_entries.findIndex((name: FlavorTextEntry) => name.language.name === "en");
             setPokemonDescription(description.flavor_text_entries[english].flavor_text);
 
             const evol = description.evolution_chain.url;
             const evolve = await fetch(evol);
             const evolution = await evolve.json();
-            console.log(evolution.chain);
 
         }
         getData();
-    }, [])
+    }, [searchPokemon])
 
     return (
         <div>
@@ -91,14 +102,14 @@ const HomePageComponent = () => {
                 <h1 className="text-6xl lg:text-8xl text-white text-center mt-10 mb-5">Pokédex</h1>
 
                 <div className="flex flex-wrap justify-center">
-                    <input id="inputField" type="text" placeholder="Search Pokémon name or ID number"
+                    <input value={pokemonInput} onChange={(e) => setPokemonInput(e.target.value)} onKeyDown={handleSearch} type="text" placeholder="Search Pokémon name or ID number"
                         className="w-52 h-10 me-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    <button id="searchBtn" type="button"
+                    <button onClick={handleSearch}
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Search</button>
                     <button id="favoritesMenuBtn" type="button" data-drawer-target="drawer-example" data-drawer-show="drawer-example"
                         aria-controls="drawer-example"
                         className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Favorites</button>
-                    <button id="randomBtn" type="button"
+                    <button onClick={handleRandom} type="button"
                         className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Random</button>
                 </div>
             </div>
