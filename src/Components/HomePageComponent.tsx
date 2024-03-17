@@ -1,21 +1,59 @@
 import React, { useEffect, useState } from 'react'
 import { PokemonAPI } from '../DataServices/DataServices'
-import { IPokemon } from '../Interfaces/IPokemon'
-import Bulbasaur from '../Assets/1.png'
+import { Ability, IPokemon, Move, Type } from '../Interfaces/IPokemon'
+import { ISpecies, FlavorTextEntry } from '../Interfaces/ISpecies'
 import heart from '../Assets/heart.png'
 import heartFull from '../Assets/heart-fill.png'
+import { Button, Modal } from 'flowbite-react'
 
 const HomePageComponent = () => {
 
-    let pokeName: any;
+    let pokeName: string = '';
+    let defaultImg;
+    let shinyImg;
 
     const [pokemon, setPokemon] = useState<IPokemon>();
-    const [pokemonName, setPokemonName] = useState<IPokemon>();
+    const [pokemonName, setPokemonName] = useState<string>();
+    const [pokemonID, setPokemonID] = useState<number>();
+    const [pokemonImage, setPokemonImage] = useState<string>();
+    const [pokemonMoves, setPokemonMoves] = useState<string>();
+    const [type, setType] = useState<string>();
+    const [pokemonAbilities, setPokemonAbilities] = useState<string>();
+    const [pokemonLocation, setPokemonLocation] = useState<string>();
+    const [pokemonDescription, setPokemonDescription] = useState<string>();
 
     useEffect(() => {
         const getData = async () => {
-            const pokeData = await PokemonAPI('ditto');
-            console.log(pokeData);
+            const pokemon = await PokemonAPI('pikachu');
+            setPokemon(pokemon);
+            let name = pokemon.name[0].toUpperCase() + pokemon.name.substring(1);
+            setPokemonName(name.split('-').join(' '));
+            setPokemonID(pokemon.id);
+            defaultImg = pokemon.sprites.other["official-artwork"].front_default;
+            shinyImg = pokemon.sprites.other["official-artwork"].front_shiny;
+            setPokemonImage(defaultImg);
+            setPokemonMoves(pokemon.moves.map((move: Move) => move.move.name).join(", "));
+            setType(pokemon.types.map((element: Type) => element.type.name).join(", "));
+            setPokemonAbilities(pokemon.abilities.map((ability: Ability) => ability.ability.name).join(", "));
+
+            const loc = await fetch(pokemon.location_area_encounters);
+            const location = await loc.json();
+            if (location.length == 0) {
+                setPokemonLocation("N/A");
+            } else {
+                setPokemonLocation(location[0].location_area.name.split("-").join(" "));
+            }
+
+            const desc = await fetch(pokemon.species.url);
+            const description = await desc.json();
+            const english = description.flavor_text_entries.findIndex((name: FlavorTextEntry) => name.language.name == "en");
+            setPokemonDescription(description.flavor_text_entries[english].flavor_text);
+
+            const evol = description.evolution_chain.url;
+            const evolve = await fetch(evol);
+            const evolution = await evolve.json();
+            console.log(evolution.chain);
+
         }
         getData();
     }, [])
@@ -72,37 +110,39 @@ const HomePageComponent = () => {
                     {/* Left Half Div */}
                     <div className="col-span-4 lg:col-span-2 mx-auto">
                         <div className="flex items-baseline justify-center my-10 bg-zinc-300/75 rounded-lg p-5">
-                            <h2 id="pokemonID" className="text-white text-3xl lg:text-5xl">#1</h2>
-                            <h2 id="pokemonName" className="text-white text-3xl lg:text-5xl px-5">Bulbasaur</h2>
-                            <img id="heartBtn" src={heart} alt="heart button" />
+                            <h2 className="text-white text-3xl lg:text-5xl">#{pokemonID}</h2>
+                            <h2 className="text-white text-3xl lg:text-5xl px-5">{pokemonName}</h2>
+                            <img src={heart} alt="heart button" />
                         </div>
-                        <img id="pokemonImg" src={Bulbasaur} alt="pokemon" />
+                        <img src={pokemonImage} alt="pokemon" />
                     </div>
 
                     {/* Right Half Div */}
                     <div className="col-span-4 lg:col-span-2">
                         <div className="mt-10 bg-zinc-300/75 rounded-lg p-5">
-                            <p id="pokemonDescription" className="text-white text-2xl lg:text-3xl">A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.</p>
+                            <p className="text-white text-2xl lg:text-3xl">{pokemonDescription}</p>
                         </div>
 
                         <div className="grid grid-cols-3 bg-zinc-300/75 rounded-lg mt-5 p-5">
                             <p className="text-white text-2xl lg:text-3xl">Type:</p>
-                            <p id="pokemonType" className="col-span-2 text-white text-2xl lg:text-3xl">grass, poison</p>
+                            <p className="col-span-2 text-white text-2xl lg:text-3xl">{type}</p>
                         </div>
 
                         <div className="grid grid-cols-3 bg-zinc-300/75 rounded-lg mt-5 p-5">
                             <p className="text-white text-2xl lg:text-3xl">Location:</p>
-                            <p id="pokemonLocation" className="col-span-2 text-white text-2xl lg:text-3xl">cerulean city area</p>
+                            <p className="col-span-2 text-white text-2xl lg:text-3xl">{pokemonLocation}</p>
                         </div>
 
                         <div className="grid grid-cols-3 bg-zinc-300/75 rounded-lg mt-5 p-5">
                             <p className="text-white text-2xl lg:text-3xl">Abilities:</p>
-                            <p id="pokemonAbilities" className="col-span-2 text-white text-2xl lg:text-3xl">overgrow, chlorophyll</p>
+                            <p className="col-span-2 text-white text-2xl lg:text-3xl">{pokemonAbilities}</p>
                         </div>
 
                         <div className="grid grid-cols-3 bg-zinc-300/75 rounded-lg mt-5 p-5 h-44 ">
                             <p className="text-white text-2xl lg:text-3xl">Moves:</p>
-                            <p id="pokemonMoves" className="col-span-2 overflow-x-scroll text-white text-2xl lg:text-3xl">razor wind, swords dance, cut, bind, vine whip, headbutt, tackle, body slam, take down, double edge, growl, strength, mega drain, leech seed, growth, razor leaf, solar beam, poison powder, sleep powder, petal dance, string shot, toxic, rage, mimic, double team, defense curl, light screen, reflect, bide, sludge, skull bash, amnesia, flash, rest, substitute, snore, curse, protect, sludge bomb, mud slap, outrage, giga drain, endure, charm, false swipe, swagger, fury cutter, attract, sleep talk, return, frustration, safeguard, sweet scent, synthesis, hidden power, sunny day, rock smash, facade, nature power, helping hand, ingrain, knock off, secret power, weather ball, grass whistle, bullet seed, magical leaf, natural gift, worry seed, seed bomb, energy ball, leaf storm, power whip, captivate, grass knot, venoshock, acid spray, round, echoed voice, grass pledge, work up, grassy terrain, confide, grassy glide, tera blast, trailblaze</p>
+                            <p className="col-span-2 overflow-x-scroll text-white text-2xl lg:text-3xl">
+                                {pokemonMoves}
+                            </p>
                         </div>
 
                         <div className="bg-zinc-300/75 rounded-lg mt-5 mb-10 p-5">
