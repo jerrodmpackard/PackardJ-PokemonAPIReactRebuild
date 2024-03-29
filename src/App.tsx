@@ -5,7 +5,7 @@ import background from './Assets/PokemonWildAreaNight.jpg'
 
 function App() {
   return (
-    <div className=' bg-cover bg-fixed h-full' style={{ backgroundImage: `url(${background})`}}>
+    <div className=' bg-cover bg-fixed min-h-screen' style={{ backgroundImage: `url(${background})`}}>
       <HomePageComponent />
     </div>
   );
