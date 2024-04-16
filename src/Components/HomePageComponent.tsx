@@ -158,7 +158,7 @@ const HomePageComponent = () => {
 
                         <div className="grid grid-cols-3 bg-zinc-300/75 rounded-lg mt-5 p-5 h-44 ">
                             <p className="text-white text-2xl lg:text-3xl">Moves:</p>
-                            <p className="col-span-2 overflow-x-scroll text-white text-2xl lg:text-3xl">
+                            <p className="col-span-2 overflow-auto text-white text-2xl lg:text-3xl">
                                 {pokemonMoves}
                             </p>
                         </div>
